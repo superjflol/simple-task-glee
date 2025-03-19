@@ -17,25 +17,12 @@ const Index = () => {
   const location = useLocation();
   const membersRef = useRef<HTMLDivElement>(null);
   const footerRef = useRef<HTMLElement>(null);
+  const communityRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Gestisce lo scroll iniziale per l'hash o la sezione salvata
+    // Handle initial scroll for hash
     const handleInitialScroll = () => {
-      // Prima controlla se c'è una sezione salvata da un'altra pagina
-      const savedSection = localStorage.getItem('scrollToSection');
-      if (savedSection) {
-        localStorage.removeItem('scrollToSection');
-        setTimeout(() => {
-          const element = document.getElementById(savedSection);
-          if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-          }
-        }, 100);
-        return;
-      }
-
-      // Altrimenti controlla l'hash URL
-      const hash = window.location.hash.slice(1);
+      const hash = location.hash.slice(1);
       if (hash) {
         setTimeout(() => {
           const element = document.getElementById(hash);
@@ -50,12 +37,12 @@ const Index = () => {
 
     handleInitialScroll();
 
-    // Gestisce il rilevamento dello scroll
+    // Handle scroll detection
     const handleScroll = () => {
-      // Mostra il pulsante per tornare in alto
+      // Show back-to-top button
       setVisible(window.scrollY > 300);
       
-      // Mostra il pulsante per andare al footer quando è nella sezione membri
+      // Show footer button when in the members section
       if (membersRef.current) {
         const membersSectionTop = membersRef.current.getBoundingClientRect().top;
         const membersSectionBottom = membersRef.current.getBoundingClientRect().bottom;
@@ -87,7 +74,9 @@ const Index = () => {
       <JudgmentFleetBanner />
       <main id="top">
         <Hero />
-        <Community />
+        <div ref={communityRef} id="community">
+          <Community />
+        </div>
         <div ref={membersRef} id="top-players">
           <TopMembers />
         </div>
@@ -96,9 +85,9 @@ const Index = () => {
         <Footer />
       </footer>
       
-      {/* Pulsanti di navigazione */}
+      {/* Navigation buttons */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
-        {/* Pulsante per tornare in alto */}
+        {/* Back to top button */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ 
@@ -117,7 +106,7 @@ const Index = () => {
           </Button>
         </motion.div>
         
-        {/* Pulsante per andare al footer - si mostra solo nella sezione Players */}
+        {/* Footer navigation button - only shows in the Players section */}
         {showFooterButton && (
           <motion.div 
             initial={{ opacity: 0, scale: 0.8 }}

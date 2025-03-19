@@ -3,14 +3,11 @@ import { useState, useEffect } from "react";
 import { Menu, X, Twitter } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Link as RouterLink, useLocation } from "react-router-dom";
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
 import LanguageSelector from "./LanguageSelector";
 
-// Rimozione del CSS non necessario
-<lov-delete file_path="src/app/components/Navbar.css" />
-
-// Nuovo componente NavLink per gestire meglio i link della navbar
+// New component NavLink for better handling navbar links
 const NavLink = ({ 
   to, 
   label, 
@@ -47,6 +44,7 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { translations } = useLanguage();
   const [activeSection, setActiveSection] = useState<string>("top");
 
@@ -62,6 +60,14 @@ const Navbar = () => {
 
   // Determina se siamo nella home page
   const isHomePage = location.pathname === "/";
+
+  // Effect to handle redirecting to home on refresh for specific sections
+  useEffect(() => {
+    // If we're on a non-home page with a hash, redirect to home
+    if (!isHomePage && location.hash) {
+      navigate("/");
+    }
+  }, [location, isHomePage, navigate]);
 
   // Effetto per gestire lo scroll
   useEffect(() => {
@@ -101,27 +107,25 @@ const Navbar = () => {
 
     window.addEventListener("scroll", handleScroll);
     
-    // Gestisce l'hash iniziale all'apertura della pagina
+    // Handle initial hash navigation
     const handleInitialHash = () => {
-      if (isHomePage) {
-        const hash = location.hash.slice(1);
-        if (hash) {
-          const element = document.getElementById(hash);
-          if (element) {
-            setTimeout(() => {
-              element.scrollIntoView({ behavior: 'smooth' });
-              setActiveSection(hash);
-            }, 100);
-          }
-        } else {
-          window.scrollTo(0, 0);
-          setActiveSection('top');
+      const hash = location.hash.slice(1);
+      if (hash && isHomePage) {
+        const element = document.getElementById(hash);
+        if (element) {
+          setTimeout(() => {
+            element.scrollIntoView({ behavior: 'smooth' });
+            setActiveSection(hash);
+          }, 100);
         }
+      } else if (isHomePage) {
+        window.scrollTo(0, 0);
+        setActiveSection('top');
       }
     };
 
     handleInitialHash();
-    handleScroll(); // Esamina lo scroll anche all'inizio
+    handleScroll(); // Check scroll position on mount
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isHomePage, location.hash]);
@@ -139,10 +143,10 @@ const Navbar = () => {
     setIsMobileMenuOpen(false);
     
     if (link.path) {
-      // Navigazione a una pagina separata
-      return;
+      // Navigate to a separate page
+      navigate(link.path);
     } else if (link.hash && isHomePage) {
-      // Scrolling interno nella home page
+      // Smooth scroll within homepage
       const element = document.getElementById(link.hash);
       if (element) {
         window.history.pushState(null, '', `#${link.hash}`);
@@ -150,8 +154,16 @@ const Navbar = () => {
         setActiveSection(link.hash);
       }
     } else if (link.hash) {
-      // Siamo su una pagina diversa e vogliamo tornare alla home con un hash
-      localStorage.setItem('scrollToSection', link.hash);
+      // We're on a different page and want to navigate to home with a hash
+      navigate('/');
+      // After navigation, scroll to the section
+      setTimeout(() => {
+        const element = document.getElementById(link.hash!);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+          setActiveSection(link.hash!);
+        }
+      }, 100);
     }
   };
 
@@ -178,24 +190,13 @@ const Navbar = () => {
           <nav className="hidden md:flex items-center justify-center">
             <div className="flex items-center space-x-8">
               {navLinks.map((link) => (
-                link.path ? (
-                  <RouterLink key={link.key} to={link.path} onClick={() => handleNavClick(link)}>
-                    <NavLink
-                      to={link.path}
-                      label={link.label}
-                      isActive={isLinkActive(link)}
-                      onClick={() => {}}
-                    />
-                  </RouterLink>
-                ) : (
-                  <NavLink
-                    key={link.key}
-                    to={`#${link.hash}`}
-                    label={link.label}
-                    isActive={isLinkActive(link)}
-                    onClick={() => handleNavClick(link)}
-                  />
-                )
+                <NavLink
+                  key={link.key}
+                  to={link.path || `#${link.hash}`}
+                  label={link.label}
+                  isActive={isLinkActive(link)}
+                  onClick={() => handleNavClick(link)}
+                />
               ))}
             </div>
           </nav>
@@ -237,28 +238,15 @@ const Navbar = () => {
           >
             <div className="container mx-auto px-4 py-4 flex flex-col space-y-4">
               {navLinks.map((link) => (
-                link.path ? (
-                  <RouterLink
-                    key={link.key}
-                    to={link.path}
-                    className={`text-gray-300 hover:text-white py-2 transition-colors ${
-                      isLinkActive(link) ? "text-white font-medium pl-2 border-l-2 border-[#D946EF]" : ""
-                    }`}
-                    onClick={() => handleNavClick(link)}
-                  >
-                    {link.label}
-                  </RouterLink>
-                ) : (
-                  <button
-                    key={link.key}
-                    className={`text-left text-gray-300 hover:text-white py-2 transition-colors ${
-                      isLinkActive(link) ? "text-white font-medium pl-2 border-l-2 border-[#D946EF]" : ""
-                    }`}
-                    onClick={() => handleNavClick(link)}
-                  >
-                    {link.label}
-                  </button>
-                )
+                <button
+                  key={link.key}
+                  className={`text-left text-gray-300 hover:text-white py-2 transition-colors ${
+                    isLinkActive(link) ? "text-white font-medium pl-2 border-l-2 border-[#D946EF]" : ""
+                  }`}
+                  onClick={() => handleNavClick(link)}
+                >
+                  {link.label}
+                </button>
               ))}
               <Button 
                 className="bg-[#D946EF] hover:bg-[#D946EF]/90 w-full"
