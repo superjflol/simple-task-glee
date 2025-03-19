@@ -2,7 +2,6 @@
 import { useState, useEffect, useRef } from "react";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { motion } from "framer-motion";
-import { useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Hero from "../components/Hero";
 import Community from "../components/Community";
@@ -14,29 +13,11 @@ import { Button } from "@/components/ui/button";
 const Index = () => {
   const [visible, setVisible] = useState(false);
   const [showFooterButton, setShowFooterButton] = useState(false);
-  const location = useLocation();
   const membersRef = useRef<HTMLDivElement>(null);
   const footerRef = useRef<HTMLElement>(null);
   const communityRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Handle initial scroll for hash
-    const handleInitialScroll = () => {
-      const hash = location.hash.slice(1);
-      if (hash) {
-        setTimeout(() => {
-          const element = document.getElementById(hash);
-          if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-          }
-        }, 100);
-      } else {
-        window.scrollTo(0, 0);
-      }
-    };
-
-    handleInitialScroll();
-
     // Handle scroll detection
     const handleScroll = () => {
       // Show back-to-top button
@@ -53,7 +34,7 @@ const Index = () => {
     window.addEventListener("scroll", handleScroll);
     
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [location]);
+  }, []);
 
   const scrollToTop = () => {
     window.scrollTo({

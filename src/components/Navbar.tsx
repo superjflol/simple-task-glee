@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Menu, X, Twitter } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -7,35 +7,22 @@ import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
 import LanguageSelector from "./LanguageSelector";
 
-// New component NavLink for better handling navbar links
+// Simple NavLink component without underlining effect
 const NavLink = ({ 
   to, 
   label, 
-  isActive, 
   onClick 
 }: { 
   to: string; 
   label: string; 
-  isActive: boolean; 
   onClick: () => void;
 }) => {
   return (
     <button
       onClick={onClick}
-      className={`relative transition-colors px-2 py-1 ${
-        isActive ? "text-white font-medium" : "text-gray-300 hover:text-white"
-      }`}
+      className="transition-colors px-2 py-1 text-gray-300 hover:text-white"
     >
       {label}
-      {isActive && (
-        <motion.div 
-          layoutId="navbar-indicator"
-          className="absolute -bottom-1 left-0 right-0 h-0.5 bg-[#D946EF]"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-        />
-      )}
     </button>
   );
 };
@@ -46,7 +33,6 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { translations } = useLanguage();
-  const [activeSection, setActiveSection] = useState<string>("top");
 
   // Definizione dei link della navbar
   const navLinks = [
@@ -61,82 +47,17 @@ const Navbar = () => {
   // Determina se siamo nella home page
   const isHomePage = location.pathname === "/";
 
-  // Effect to handle redirecting to home on refresh for specific sections
-  useEffect(() => {
-    // If we're on a non-home page with a hash, redirect to home
-    if (!isHomePage && location.hash) {
-      navigate("/");
-    }
-  }, [location, isHomePage, navigate]);
-
   // Effetto per gestire lo scroll
-  useEffect(() => {
+  useState(() => {
     const handleScroll = () => {
       // Cambia lo stile della navbar in base allo scroll
       setIsScrolled(window.scrollY > 20);
-
-      // Aggiorna la sezione attiva solo se siamo nella home page
-      if (isHomePage) {
-        const sections = {
-          top: document.getElementById('top'),
-          community: document.getElementById('community'),
-          'top-players': document.getElementById('top-players'),
-          resources: document.getElementById('resources')
-        };
-
-        const viewportHeight = window.innerHeight;
-        const viewportMiddle = window.scrollY + (viewportHeight / 2);
-
-        let currentSection = 'top';
-        let minDistance = Infinity;
-
-        Object.entries(sections).forEach(([id, element]) => {
-          if (element) {
-            const rect = element.getBoundingClientRect();
-            const absDistance = Math.abs((window.scrollY + rect.top) - viewportMiddle);
-            if (absDistance < minDistance) {
-              minDistance = absDistance;
-              currentSection = id;
-            }
-          }
-        });
-
-        setActiveSection(currentSection);
-      }
     };
 
     window.addEventListener("scroll", handleScroll);
     
-    // Handle initial hash navigation
-    const handleInitialHash = () => {
-      const hash = location.hash.slice(1);
-      if (hash && isHomePage) {
-        const element = document.getElementById(hash);
-        if (element) {
-          setTimeout(() => {
-            element.scrollIntoView({ behavior: 'smooth' });
-            setActiveSection(hash);
-          }, 100);
-        }
-      } else if (isHomePage) {
-        window.scrollTo(0, 0);
-        setActiveSection('top');
-      }
-    };
-
-    handleInitialHash();
-    handleScroll(); // Check scroll position on mount
-
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [isHomePage, location.hash]);
-
-  // Verifica se un link è attivo
-  const isLinkActive = (link: typeof navLinks[0]): boolean => {
-    if (link.path) {
-      return location.pathname === link.path;
-    }
-    return isHomePage && activeSection === link.hash;
-  };
+  });
 
   // Gestisce il click su un link della navbar
   const handleNavClick = (link: typeof navLinks[0]) => {
@@ -149,21 +70,11 @@ const Navbar = () => {
       // Smooth scroll within homepage
       const element = document.getElementById(link.hash);
       if (element) {
-        window.history.pushState(null, '', `#${link.hash}`);
         element.scrollIntoView({ behavior: 'smooth' });
-        setActiveSection(link.hash);
       }
     } else if (link.hash) {
-      // We're on a different page and want to navigate to home with a hash
+      // Navigate to home
       navigate('/');
-      // After navigation, scroll to the section
-      setTimeout(() => {
-        const element = document.getElementById(link.hash!);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
-          setActiveSection(link.hash!);
-        }
-      }, 100);
     }
   };
 
@@ -194,7 +105,6 @@ const Navbar = () => {
                   key={link.key}
                   to={link.path || `#${link.hash}`}
                   label={link.label}
-                  isActive={isLinkActive(link)}
                   onClick={() => handleNavClick(link)}
                 />
               ))}
@@ -240,9 +150,7 @@ const Navbar = () => {
               {navLinks.map((link) => (
                 <button
                   key={link.key}
-                  className={`text-left text-gray-300 hover:text-white py-2 transition-colors ${
-                    isLinkActive(link) ? "text-white font-medium pl-2 border-l-2 border-[#D946EF]" : ""
-                  }`}
+                  className="text-left text-gray-300 hover:text-white py-2 transition-colors"
                   onClick={() => handleNavClick(link)}
                 >
                   {link.label}
