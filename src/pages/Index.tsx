@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { motion } from "framer-motion";
@@ -18,14 +19,28 @@ const Index = () => {
   const footerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    // Handle section scrolling from navigation or refresh
+    // Gestisce lo scroll iniziale per l'hash o la sezione salvata
     const handleInitialScroll = () => {
+      // Prima controlla se c'è una sezione salvata da un'altra pagina
+      const savedSection = localStorage.getItem('scrollToSection');
+      if (savedSection) {
+        localStorage.removeItem('scrollToSection');
+        setTimeout(() => {
+          const element = document.getElementById(savedSection);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 100);
+        return;
+      }
+
+      // Altrimenti controlla l'hash URL
       const hash = window.location.hash.slice(1);
       if (hash) {
         setTimeout(() => {
           const element = document.getElementById(hash);
           if (element) {
-            element.scrollIntoView();
+            element.scrollIntoView({ behavior: 'smooth' });
           }
         }, 100);
       } else {
@@ -35,22 +50,12 @@ const Index = () => {
 
     handleInitialScroll();
 
-    // Handle scroll restoration
-    if (location.state && location.state.scrollTo) {
-      setTimeout(() => {
-        const element = document.getElementById(location.state.scrollTo);
-        if (element) {
-          element.scrollIntoView();
-        }
-      }, 100);
-    }
-
-    // Handle scroll detection
+    // Gestisce il rilevamento dello scroll
     const handleScroll = () => {
-      // Show top button when scrolled down
+      // Mostra il pulsante per tornare in alto
       setVisible(window.scrollY > 300);
       
-      // Show footer button when in members section
+      // Mostra il pulsante per andare al footer quando è nella sezione membri
       if (membersRef.current) {
         const membersSectionTop = membersRef.current.getBoundingClientRect().top;
         const membersSectionBottom = membersRef.current.getBoundingClientRect().bottom;
@@ -91,13 +96,13 @@ const Index = () => {
         <Footer />
       </footer>
       
-      {/* Navigation buttons */}
+      {/* Pulsanti di navigazione */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
-        {/* To top button */}
+        {/* Pulsante per tornare in alto */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ 
-            opacity: visible ? 1 : 0.7, 
+            opacity: visible ? 1 : 0, 
             scale: visible ? 1 : 0.9,
             y: visible ? 0 : 10 
           }}
@@ -112,7 +117,7 @@ const Index = () => {
           </Button>
         </motion.div>
         
-        {/* To footer button - only shows when in Players section */}
+        {/* Pulsante per andare al footer - si mostra solo nella sezione Players */}
         {showFooterButton && (
           <motion.div 
             initial={{ opacity: 0, scale: 0.8 }}
