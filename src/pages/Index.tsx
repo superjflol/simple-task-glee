@@ -9,6 +9,7 @@ import TopMembers from "../components/TopMembers";
 import Footer from "../components/Footer";
 import JudgmentFleetBanner from "../components/JudgmentFleetBanner";
 import { Button } from "@/components/ui/button";
+import { useLocation } from "react-router-dom";
 
 const Index = () => {
   const [visible, setVisible] = useState(false);
@@ -16,6 +17,20 @@ const Index = () => {
   const membersRef = useRef<HTMLDivElement>(null);
   const footerRef = useRef<HTMLElement>(null);
   const communityRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+
+  // Handle scrolling to the correct section when hash changes
+  useEffect(() => {
+    const hash = location.hash.replace('#', '');
+    if (hash) {
+      setTimeout(() => {
+        const element = document.getElementById(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, [location.hash]);
 
   useEffect(() => {
     // Handle scroll detection
