@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -39,4 +40,50 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Beautiful Input and Form Styling */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(217, 70, 239, 0.25), 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.form-control {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.form-control label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #f0f0f0;
+}
+
+.form-control input,
+.form-control textarea,
+.form-control select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.form-control input:hover,
+.form-control textarea:hover,
+.form-control select:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.form-control input:focus,
+.form-control textarea:focus,
+.form-control select:focus {
+  border-color: rgba(217, 70, 239, 0.5);
+  box-shadow: 0 0 0 2px rgba(217, 70, 239, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
