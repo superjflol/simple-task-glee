@@ -1,3 +1,4 @@
+
 /* Admin Dashboard Styles */
 .admin-dashboard-container {
   @apply min-h-screen bg-gradient-to-b from-jf-dark to-black/95 text-white;
@@ -45,13 +46,21 @@
 }
 
 .admin-form label {
-  @apply block text-sm font-medium mb-1 text-gray-300;
+  @apply block text-sm font-medium mb-2 text-gray-300;
 }
 
 .admin-form input,
 .admin-form textarea,
 .admin-form select {
-  @apply w-full p-2.5 bg-black/50 border border-white/10 rounded-md text-white placeholder-gray-500 focus:ring-2 focus:ring-jf-purple focus:border-transparent transition-all duration-200;
+  @apply w-full p-3 bg-black/60 border border-white/10 rounded-md text-white placeholder-gray-500 shadow-inner shadow-black/20
+  focus:outline-none focus:ring-2 focus:ring-jf-purple focus:ring-opacity-50 focus:border-transparent
+  hover:border-white/20 transition-all duration-200;
+}
+
+.admin-form input:focus,
+.admin-form textarea:focus,
+.admin-form select:focus {
+  box-shadow: 0 0 0 2px rgba(217, 70, 239, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .admin-tag {
@@ -148,15 +157,15 @@
 
 /* Enhanced Input Fields */
 .enhanced-input {
-  @apply bg-black/50 border border-white/10 rounded-md px-4 py-2.5 text-white placeholder:text-gray-500 
-  focus:border-jf-purple/50 focus:ring-2 focus:ring-jf-purple/30 transition-all duration-200
-  hover:border-white/20;
+  @apply bg-black/60 border border-white/10 rounded-md px-4 py-3 text-white placeholder:text-gray-500 
+  focus:border-jf-purple/50 focus:ring-2 focus:ring-jf-purple/30 focus:outline-none transition-all duration-200
+  hover:border-white/20 shadow-inner shadow-black/20;
 }
 
 .enhanced-textarea {
-  @apply bg-black/50 border border-white/10 rounded-md px-4 py-2.5 text-white placeholder:text-gray-500 
-  focus:border-jf-purple/50 focus:ring-2 focus:ring-jf-purple/30 transition-all duration-200
-  hover:border-white/20 min-h-[120px] resize-y;
+  @apply bg-black/60 border border-white/10 rounded-md px-4 py-3 text-white placeholder:text-gray-500 
+  focus:border-jf-purple/50 focus:ring-2 focus:ring-jf-purple/30 focus:outline-none transition-all duration-200
+  hover:border-white/20 min-h-[120px] resize-y shadow-inner shadow-black/20;
 }
 
 .admin-logout-button {
