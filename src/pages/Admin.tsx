@@ -9,7 +9,7 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { Upload, Plus, Save, X, Edit, Trash2, Users, Shield, Award, Gamepad2, HelpCircle, Link2, Layout } from "lucide-react";
+import { Upload, Plus, Save, X, Edit, Trash2, Users, Shield, Award, Gamepad2, HelpCircle, Link2, Layout, LogOut } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
@@ -1133,7 +1133,7 @@ const AdminManager = () => {
 };
 
 const Admin = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
   const { translations } = useLanguage();
   const [adminStatus, setAdminStatus] = useState(false);
@@ -1180,6 +1180,24 @@ const Admin = () => {
     }
   }, [user, toast]);
 
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate('/');
+      toast({
+        title: "Logout effettuato",
+        description: "Hai effettuato il logout con successo.",
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast({
+        title: "Errore durante il logout",
+        description: "Si è verificato un problema durante il logout",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (authLoading || checkingAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-jf-dark">
@@ -1210,13 +1228,22 @@ const Admin = () => {
         <div className="container mx-auto max-w-6xl px-4">
           <div className="admin-dashboard-header">
             <h1 className="admin-dashboard-title">Admin Dashboard</h1>
-            <Button 
-              variant="outline" 
-              onClick={() => navigate("/")} 
-              className="bg-black/30 border-white/10 text-white hover:bg-white/10"
-            >
-              Back to Site
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="outline" 
+                onClick={handleLogout}
+                className="admin-logout-button"
+              >
+                <LogOut size={16} /> Logout
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate("/")} 
+                className="bg-black/30 border-white/10 text-white hover:bg-white/10"
+              >
+                Back to Site
+              </Button>
+            </div>
           </div>
 
           <Tabs defaultValue="members" className="w-full">
