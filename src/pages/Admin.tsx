@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -820,6 +819,7 @@ const AdminManager = () => {
   const [newAdminEmail, setNewAdminEmail] = useState("");
   const { toast } = useToast();
   const { user } = useAuth();
+  const [firstAdmin, setFirstAdmin] = useState(null);
 
   const fetchAdmins = async () => {
     try {
@@ -827,10 +827,14 @@ const AdminManager = () => {
       const { data, error } = await supabase
         .from('admins')
         .select('*')
-        .order('id', { ascending: true });
+        .order('created_at', { ascending: true });
 
       if (error) throw error;
       setAdmins(data || []);
+      
+      if (data && data.length > 0) {
+        setFirstAdmin(data[0].id);
+      }
     } catch (error) {
       console.error("Error fetching admins:", error);
       toast({
@@ -931,6 +935,15 @@ const AdminManager = () => {
   };
 
   const handleToggleAdminStatus = async (id, isCurrentlyActive) => {
+    if (id === firstAdmin) {
+      toast({
+        title: "Cannot deactivate first admin",
+        description: "The first registered admin cannot be deactivated for security reasons",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     try {
       const { error } = await supabase
         .from('admins')
@@ -958,6 +971,15 @@ const AdminManager = () => {
   };
 
   const handleDeleteAdmin = async (id) => {
+    if (id === firstAdmin) {
+      toast({
+        title: "Cannot delete first admin",
+        description: "The first registered admin cannot be deleted for security reasons",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (id === user?.id) {
       toast({
         title: "Cannot delete yourself",
@@ -1058,6 +1080,11 @@ const AdminManager = () => {
                             Inactive
                           </span>
                         )}
+                        {admin.id === firstAdmin && (
+                          <span className="status-badge bg-amber-500/20 text-amber-300 border border-amber-500/30 ml-2">
+                            Primary Admin
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="flex space-x-2">
@@ -1066,6 +1093,7 @@ const AdminManager = () => {
                         size="sm"
                         onClick={() => handleToggleAdminStatus(admin.id, admin.is_active)}
                         className={admin.is_active ? "bg-white/10 hover:bg-white/15 text-white" : "bg-green-500/20 hover:bg-green-500/30 text-green-300"}
+                        disabled={admin.id === firstAdmin}
                       >
                         {admin.is_active ? "Deactivate" : "Activate"}
                       </Button>
@@ -1074,7 +1102,7 @@ const AdminManager = () => {
                         size="sm"
                         onClick={() => handleDeleteAdmin(admin.id)}
                         className="delete-button"
-                        disabled={admin.id === user?.id}
+                        disabled={admin.id === user?.id || admin.id === firstAdmin}
                       >
                         <Trash2 size={16} /> Delete
                       </Button>
@@ -1102,6 +1130,7 @@ const AdminManager = () => {
             <tbody className="divide-y divide-gray-800">
               {users.map((user) => {
                 const isAdmin = admins.some(admin => admin.id === user.id && admin.is_active);
+                const isPrimaryAdmin = user.id === firstAdmin;
                 return (
                   <tr key={user.id} className="hover:bg-white/5">
                     <td className="px-6 py-4 text-sm text-white">{user.email}</td>
@@ -1110,7 +1139,9 @@ const AdminManager = () => {
                       {new Date(user.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 text-sm">
-                      {isAdmin ? (
+                      {isAdmin && isPrimaryAdmin ? (
+                        <span className="status-badge bg-amber-500/20 text-amber-300 border border-amber-500/30">Primary Admin</span>
+                      ) : isAdmin ? (
                         <span className="status-badge status-active">Admin</span>
                       ) : (
                         <span className="status-badge bg-gray-500/20 text-gray-300 border border-gray-500/30">User</span>
